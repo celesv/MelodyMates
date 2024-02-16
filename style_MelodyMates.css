@@ -220,6 +220,11 @@ input[type="text"][id="input_search"] {
   max-height: 200px;
 }
 
+.no_results{
+  display: none;
+  justify-content: center;
+}
+
 ::-webkit-scrollbar-track {
 }
 
