@@ -31,6 +31,7 @@ class Song {
 
     function formatTime(e) {
       let minutes = Math.floor(e / 60);
+      minutes = minutes < 10 ? `0${minutes}` : minutes;
       let seconds = Math.floor(e % 60); 
       seconds = seconds < 10 ? `0${seconds}` : seconds;
       return `${minutes}:${seconds}`;
