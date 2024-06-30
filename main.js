@@ -1,13 +1,3 @@
-// const id_input_search = document.getElementById("input_search");
-// const v_no_results = document.querySelector(".no_results");
-// const id_canciones = document.getElementById("all_songs_search");
-// const id_playlist = document.getElementById("playlist");
-// const id_favoritos = document.getElementById("favoritos");
-// const id_music_player = document.getElementById("music_player");
-
-const songs_container = document.getElementsByClassName("songs_container")[0]; // Selecciona el primer elemento con la clase "songs_container"
-// const song_sngs_srch = document.getElementsByClassName("song")[0];
-
 class Song {
   static number = 1; // Propiedad estática, compartida entre todas las instancias
   constructor({
@@ -335,234 +325,56 @@ const arr_songs = [
   }),
 ];
 
-// function crearHtml(arr_songs) {
-//   const array_crearHtml = []; // Array para almacenar los elementos creados
-
-//   arr_songs.forEach((e) => {
-//     const numberSong = document.createElement("div");
-//     numberSong.className = "number_song";
-//     numberSong.textContent = e.numb;
-
-//     const infoSong = document.createElement("div");
-//     infoSong.className = "info_song";
-
-//     const nameSong = document.createElement("div");
-//     nameSong.className = "name_song";
-//     nameSong.textContent = e.title;
-
-//     const lineBottom = document.createElement("div");
-//     lineBottom.className = "line_bottom";
-
-//     const artist = document.createElement("div");
-//     artist.className = "artist";
-//     artist.textContent = e.artist;
-
-//     const duration = document.createElement("div");
-//     duration.className = "duration";
-//     duration.textContent = "00:00";
-
-//     const btnContainer = document.createElement("div");
-//     btnContainer.className = "btn_container";
-
-//     const playLink = document.createElement("a");
-//     playLink.href = "";
-
-//     const playImg = document.createElement("img");
-//     playImg.src = "src/play.svg";
-//     playImg.alt = "";
-//     playImg.className = "icon play";
-
-//     const favoriteLink = document.createElement("a");
-//     favoriteLink.href = "";
-//     favoriteLink.className = "favorite";
-
-//     const favoriteImg = document.createElement("img");
-//     favoriteImg.src = "src/favorite.svg";
-//     favoriteImg.alt = "";
-//     favoriteImg.className = "icon";
-
-//     const playListLink = document.createElement("a");
-//     playListLink.href = "";
-
-//     const playListImg = document.createElement("img");
-//     playListImg.src = "src/play_list.svg";
-//     playListImg.alt = "";
-//     playListImg.className = "icon play_list";
-
-//     // Construir estructura del DOM
-
-//     // Iconos
-//     playLink.appendChild(playImg);
-//     favoriteLink.appendChild(favoriteImg);
-//     playListLink.appendChild(playListImg);
-
-//     // Etiquetas a
-//     btnContainer.appendChild(playLink);
-//     btnContainer.appendChild(favoriteLink);
-//     btnContainer.appendChild(playListLink);
-
-//     lineBottom.appendChild(artist);
-//     lineBottom.appendChild(duration);
-
-//     infoSong.appendChild(nameSong);
-//     infoSong.appendChild(lineBottom);
-
-//     // Crear contenedor principal
-//     const song_sngs_srch = document.createElement("li"); // Cambiado para crear un nuevo elemento div
-//     song_sngs_srch.setAttribute("data-id", e.id); // Agregar atributo data-id
-//     song_sngs_srch.className = "song sngs_srch";
-//     song_sngs_srch.appendChild(numberSong);
-//     song_sngs_srch.appendChild(infoSong);
-//     song_sngs_srch.appendChild(btnContainer);
-
-//     array_crearHtml.push(song_sngs_srch); // Añadir el elemento creado al array
-
-//     favoriteLink.addEventListener("click", (e) => {
-//       e.preventDefault();
-//       const targetElement = e.target.closest("li.song");
-//       if (targetElement) {
-//         const songId = targetElement.getAttribute("data-id");
-//         console.log("ID de la canción:", songId);
-//       }
-//     });
-
-//     playListLink.addEventListener("click", (e) => {
-//       e.preventDefault();
-//       const targetElement = e.target.closest("li.song");
-//       if (targetElement) {
-//         const songId = targetElement.getAttribute("data-id");
-//         console.log("ID de la canción:", songId);
-//       }
-//     });
-    
-
-//   });
-
-//   return array_crearHtml; // Devolver el array completo fuera del forEach
-
-// }
-
-// Crear y añadir los nuevos elementos li (canciones) al DOM
-
-
 class Playlist {
-  constructor(nombreDeSeccion, cancionesArr = []) {
+  constructor({ nombreDeSeccion, ExtensionInterfazGrafica }) {
+    this.Ext_InterfazGrafica = ExtensionInterfazGrafica;
     this.listName = nombreDeSeccion;
-    this.songs = cancionesArr.map(e => new Song(e));
-    this.nextNumb = 1; // Inicializar el contador para el próximo número
-
-
+    this.songs = [];
   }
 
-  addSong(song) {
-    song.numb = this.nextNumb++;
-    this.songs.push(song);
+  addSong(e) {
+    this.songs.push(e);
   }
 
-  limpiarContenedor(e) {
-    while (e.firstChild) {
-        e.removeChild(e.firstChild);
-    }
+  removeSong(e) {
+    const index = this.songs.indexOf(e);
+    if (index === -1) return; // Esto indica que no encontró la canción
+    this.songs.splice(index, 1); // Si existe la canción, se borra usando su posición(index), solo ese elemento ('1')
+  }
 }
 
-  // Otras funciones de la clase...
+class Favoritos {
+  constructor({ nombreDeSeccion, ExtensionInterfazGrafica }) {
+    this.Ext_InterfazGrafica = ExtensionInterfazGrafica;
+    this.listName = nombreDeSeccion;
+    this.songs = [];
+  }
+  addSong(e) {
+    this.songs.push(e);
+  }
+
+  removeSong(e) {
+    const index = this.songs.indexOf(e);
+    if (index === -1) return; // Esto indica que no encontró la canción
+    this.songs.splice(index, 1); // Si existe la canción, se borra usando su posición(index), solo ese elemento ('1')
+  }
 }
-
-
 
 class Canciones {
-  constructor(nombreDeSeccion, cancionesArr = []) {
+  constructor({
+    nombreDeSeccion,
+    ExtensionInterfazGrafica,
+    cancionesArr = [],
+  }) {
     this.listName = nombreDeSeccion;
     this.songs = cancionesArr;
-    this.Playlist = new Playlist("Playlist");
+    this.Ext_InterfazGrafica = ExtensionInterfazGrafica;
   }
 
-  crearHtml(arrayEjemp) {
-    const array_crearHtml = []; // Array para almacenar los elementos creados
-  
-    arrayEjemp.forEach((e) => {
-
-
-
-      const numberSong = document.createElement("div");
-      numberSong.className = "number_song";
-      numberSong.textContent = e.numb;
-  
-      const infoSong = document.createElement("div");
-      infoSong.className = "info_song";
-  
-      const nameSong = document.createElement("div");
-      nameSong.className = "name_song";
-      nameSong.textContent = e.title;
-  
-      const lineBottom = document.createElement("div");
-      lineBottom.className = "line_bottom";
-  
-      const artist = document.createElement("div");
-      artist.className = "artist";
-      artist.textContent = e.artist;
-  
-      const duration = document.createElement("div");
-      duration.className = "duration";
-      duration.textContent = "00:00";
-  
-      const btnContainer = document.createElement("div");
-      btnContainer.className = "btn_container";
-  
-      const playLink = document.createElement("a");
-      playLink.href = "";
-  
-      const playImg = document.createElement("img");
-      playImg.src = "src/play.svg";
-      playImg.alt = "";
-      playImg.className = "icon play";
-  
-      const favoriteLink = document.createElement("a");
-      favoriteLink.href = "";
-      favoriteLink.className = "favorite";
-  
-      const favoriteImg = document.createElement("img");
-      favoriteImg.src = "src/favorite.svg";
-      favoriteImg.alt = "";
-      favoriteImg.className = "icon";
-  
-      const playListLink = document.createElement("a");
-      playListLink.href = "";
-  
-      const playListImg = document.createElement("img");
-      playListImg.src = "src/play_list.svg";
-      playListImg.alt = "";
-      playListImg.className = "icon play_list";
-  
-      // Construir estructura del DOM
-  
-      // Iconos
-      playLink.appendChild(playImg);
-      favoriteLink.appendChild(favoriteImg);
-      playListLink.appendChild(playListImg);
-  
-      // Etiquetas a
-      btnContainer.appendChild(playLink);
-      btnContainer.appendChild(favoriteLink);
-      btnContainer.appendChild(playListLink);
-  
-      lineBottom.appendChild(artist);
-      lineBottom.appendChild(duration);
-  
-      infoSong.appendChild(nameSong);
-      infoSong.appendChild(lineBottom);
-  
-      // Crear contenedor principal de cada canción
-      const song_sngs_srch = document.createElement("li"); 
-      song_sngs_srch.setAttribute("data-id", e.id); // Agregar atributo data-id
-      song_sngs_srch.className = "song sngs_srch";
-      song_sngs_srch.appendChild(numberSong);
-      song_sngs_srch.appendChild(infoSong);
-      song_sngs_srch.appendChild(btnContainer);
-  
-      array_crearHtml.push(song_sngs_srch); // Añadir el elemento creado al array
-  
-      favoriteLink.addEventListener("click", (e) => {
+  clicFavoritos() {
+    const favoriteLink = document.querySelectorAll("a>img.favorite");
+    favoriteLink.forEach((i) => {
+      i.addEventListener("click", (e) => {
         e.preventDefault();
         const targetElement = e.target.closest("li.song");
         if (targetElement) {
@@ -570,81 +382,492 @@ class Canciones {
           console.log("ID de la canción:", songId);
         }
       });
-  
-      playListLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        const targetElement = e.target.closest("li.song");
-        if (targetElement) {
-          const songId = targetElement.getAttribute("data-id");
-          console.log("ID de la canción:", songId);
-      
-          // Encontrar la instancia de la canción correspondiente al data-id
-          const clickedSong = arr_songs.
-          find(i => i.id === parseInt(songId));
-          if (clickedSong) {
-            this.agregarCancionesAPlaylist(clickedSong);
-          } else {
-            console.error("No se encontró la canción con el ID:", songId);
-          }
-
-    }});
-      
-  
     });
-  
-    return array_crearHtml; // Devolver el array completo fuera del forEach
-  
   }
-  
-  agregarCancionesACanciones(arrayEjemp) {
-    try {
-      const elmntsLiDom = this.crearHtml(arrayEjemp);
-      elmntsLiDom.forEach((e) => {
-        songs_container.appendChild(e);
-      });
-      console.log(typeof(arrayEjemp)); //Cuando usas typeof para verificar el tipo de arrayEjemp, obtienes "object" porque en JavaScript, los arrays son un tipo especial de objeto. Todos los arrays en JavaScript tienen el tipo "object".
-      console.log(`¿Es un array?`, Array.isArray(arrayEjemp)); // Si deseas asegurarte de que arrayEjemp es un array, puedes usar el método Array.isArray en lugar de typeof. Esto devolverá true si arrayEjemp es un array
+}
+class InterfazGrafica {
+  constructor(instanciaReproductor) {
+    this.Reproductor = instanciaReproductor;
+    this.songs_container =
+      document.getElementsByClassName("songs_container")[0]; // Selecciona el primer elemento con la clase "songs_container"
+    this.id_playlist = document.getElementById("id_playlist");
+    this.songs_container_favoritos =
+      document.getElementsByClassName("songs_container")[2];
+  }
 
-    } catch (error) {
-      console.error("Error al agregar canciones:", error); //  Captura cualquier error que ocurra durante la ejecución de forEach debido a las propiedades indefinidas de las instancias de la clase Song y lo imprimirá en la consola sin detener la ejecución del programa.
+  limpiarContenedor(e) {
+    while (e.firstChild) {
+      e.removeChild(e.firstChild);
     }
   }
 
+  validarCancion(e) {
+    const targetElement = e.target.closest("li.song");
 
-  agregarCancionesAPlaylist(EstoNOesArrayEsUnaInstancia) {
-    try {
+    if (targetElement) {
+      const songId = targetElement.getAttribute("data-id");
+      console.log("ID de la canción:", songId);
 
-      console.log(`¿Es un array?`, Array.isArray(EstoNOesArrayEsUnaInstancia));
+      const insCancEncontrada = this.Reproductor.Canciones.songs.find(
+        (i) => i.id === parseInt(songId)
+      );
 
-      const Cancion_Playlist = this.Playlist;
-      const id_playlist = document.getElementById("id_playlist");
+      return insCancEncontrada;
+    }
+  }
 
-      const idCancion = EstoNOesArrayEsUnaInstancia.id;
-      // Verificar si la canción ya está en la playlist
-      const cancionExistente = this.Playlist.songs.find(e => e.id === idCancion);
-  
-      if (cancionExistente) {
-        console.log(`La canción con ID ${idCancion} ya está en la playlist. No se agregará nuevamente.`);
-        return; // Salir de la función si la canción ya está en la playlist
+  crearHtmlEnCanciones(arrayEjemp, config = true) {
+    const array_crearHtml = []; // Array para almacenar los elementos creados
+
+    this.limpiarContenedor(this.songs_container); // Limpia el contenedor de la seccion Canciones para que las instancias de canciones se actualicen con la nueva funcionalidad de los botones
+
+    arrayEjemp.forEach((e) => {
+      const numberSong = document.createElement("div");
+      numberSong.className = "number_song";
+      numberSong.textContent = e.numb;
+
+      const infoSong = document.createElement("div");
+      infoSong.className = "info_song";
+
+      const nameSong = document.createElement("div");
+      nameSong.className = "name_song";
+      nameSong.textContent = e.title;
+
+      const lineBottom = document.createElement("div");
+      lineBottom.className = "line_bottom";
+
+      const artist = document.createElement("div");
+      artist.className = "artist";
+      artist.textContent = e.artist;
+
+      const duration = document.createElement("div");
+      duration.className = "duration";
+      duration.textContent = "00:00";
+
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "btn_container";
+
+      const playLink = document.createElement("a");
+      playLink.href = "";
+
+      const playImg = document.createElement("img");
+      playImg.src = "src/play.svg";
+      playImg.alt = "";
+      playImg.className = "icon play";
+
+      const favoriteLink = document.createElement("a");
+      favoriteLink.href = "";
+
+      const favoriteImg = document.createElement("img");
+      favoriteImg.src = "src/favorite.svg";
+      favoriteImg.alt = "";
+      favoriteImg.className = "icon favorite";
+
+      const playListLink = document.createElement("a");
+      playListLink.href = "";
+
+      const playListImg = document.createElement("img");
+      playListImg.src = "src/play_list.svg";
+      playListImg.alt = "";
+      playListImg.className = "icon play_list";
+
+      // Construir estructura del DOM
+
+      // Iconos
+      playLink.appendChild(playImg);
+      favoriteLink.appendChild(favoriteImg);
+      playListLink.appendChild(playListImg);
+
+      // Etiquetas a
+      btnContainer.appendChild(playLink);
+      btnContainer.appendChild(favoriteLink);
+      btnContainer.appendChild(playListLink);
+
+      //Funcionalidad de los botones
+
+      // Boton Playlist
+      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
+      if (isInPlaylist) {
+        playListImg.src = "src/trash_btn.svg";
+        playListLink.onclick = (i) => {
+          this.removerCancionPlaylist(i, config);
+        };
+      } else {
+        playListLink.onclick = (i) => {
+          this.agregarCancionPlaylist(i, config);
+        };
       }
-      
-      Cancion_Playlist.addSong(EstoNOesArrayEsUnaInstancia);
-      console.log(`Canciones agregadas a la Playlist:`, EstoNOesArrayEsUnaInstancia.title);
 
-      Cancion_Playlist.limpiarContenedor(id_playlist); // Limpiar antes de agregar las canciones, es decir, antes llamar al metodo this.crearHtml para evitar repeticiones de canciones
-      
+      // Boton Favoritos
+      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
+      if (isFavorite) {
+        favoriteLink.onclick = (i) => {
+          this.removerCancionFavoritos(i, config);
+        };
+      } else {
+        favoriteLink.onclick = (i) => {
+          this.agregarCancionFavoritos(i, config);
+        };
+      }
 
-      const elmntsLiDom = this.crearHtml(this.Playlist.songs);
+      lineBottom.appendChild(artist);
+      lineBottom.appendChild(duration);
+
+      infoSong.appendChild(nameSong);
+      infoSong.appendChild(lineBottom);
+
+      // Crear contenedor principal de cada canción
+      const song_sngs_li = document.createElement("li");
+      song_sngs_li.setAttribute("data-id", e.id); // Agregar atributo data-id
+      song_sngs_li.className = "song sngs_srch";
+      song_sngs_li.appendChild(numberSong);
+      song_sngs_li.appendChild(infoSong);
+      song_sngs_li.appendChild(btnContainer);
+
+      array_crearHtml.push(song_sngs_li); // Añadir el elemento html creado al array
+    });
+
+    return array_crearHtml; // Devolver el array completo fuera del forEach
+  }
+
+  renderHtmlCanciones(arrayEjemp = this.Reproductor.Canciones.songs, config) {
+    try {
+      const elmntsLiDom = this.crearHtmlEnCanciones(arrayEjemp, config);
       elmntsLiDom.forEach((e) => {
-        id_playlist.appendChild(e);
+        this.songs_container.appendChild(e);
       });
+
+      console.log(typeof arrayEjemp); //Cuando usas typeof para verificar el tipo de arrayEjemp, obtienes "object" porque en JavaScript, los arrays son un tipo especial de objeto. Todos los arrays en JavaScript tienen el tipo "object".
+      console.log(`¿Es un array?`, Array.isArray(arrayEjemp)); // Si deseas asegurarte de que arrayEjemp es un array, puedes usar el método Array.isArray en lugar de typeof. Esto devolverá true si arrayEjemp es un array
     } catch (error) {
-      console.error("Error al agregar canciones al PLaylist:", error); //  Captura cualquier error que ocurra durante la ejecución de forEach debido a las propiedades indefinidas de las instancias de la clase Song y lo imprimirá en la consola sin detener la ejecución del programa.
+      console.log("Error al renderizar canciones en Canciones:", error); //  Captura cualquier error que ocurra durante la ejecución de forEach debido a las propiedades indefinidas de las instancias de la clase Song y lo imprimirá en la consola sin detener la ejecución del programa.
     }
   }
-  
+
+  crearHtmlEnPlaylist(arrayEjemp, config = true) {
+    const array_crearHtml = []; // Array para almacenar los elementos creados
+
+    this.limpiarContenedor(this.id_playlist); // Limpia el contenedor de la seccion Playlist para actualizar las instancias de las canciones
+
+    arrayEjemp.forEach((e) => {
+      const numberSong = document.createElement("div");
+      numberSong.className = "number_song";
+      numberSong.textContent = e.numb;
+
+      const infoSong = document.createElement("div");
+      infoSong.className = "info_song";
+
+      const nameSong = document.createElement("div");
+      nameSong.className = "name_song";
+      nameSong.textContent = e.title;
+
+      const lineBottom = document.createElement("div");
+      lineBottom.className = "line_bottom";
+
+      const artist = document.createElement("div");
+      artist.className = "artist";
+      artist.textContent = e.artist;
+
+      const duration = document.createElement("div");
+      duration.className = "duration";
+      duration.textContent = "00:00";
+
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "btn_container";
+
+      const playLink = document.createElement("a");
+      playLink.href = "";
+
+      const playImg = document.createElement("img");
+      playImg.src = "src/play.svg";
+      playImg.alt = "";
+      playImg.className = "icon play";
+
+      const favoriteLink = document.createElement("a");
+      favoriteLink.href = "";
+
+      const favoriteImg = document.createElement("img");
+      favoriteImg.src = "src/favorite.svg";
+      favoriteImg.alt = "";
+      favoriteImg.className = "icon favorite";
+
+      const playListLink = document.createElement("a");
+      playListLink.href = "";
+
+      const playListImg = document.createElement("img");
+      playListImg.src = "src/play_list.svg";
+      playListImg.alt = "";
+      playListImg.className = "icon play_list";
+
+      // Construir estructura del DOM
+
+      // Iconos
+      playLink.appendChild(playImg);
+      favoriteLink.appendChild(favoriteImg);
+      playListLink.appendChild(playListImg);
+
+      // Etiquetas a
+      btnContainer.appendChild(playLink);
+      btnContainer.appendChild(favoriteLink);
+      btnContainer.appendChild(playListLink);
+
+      //Funcionalidad de los botones
+      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
+      if (isInPlaylist) {
+        playListImg.src = "src/trash_btn.svg";
+        playListLink.onclick = (i) => {
+          this.removerCancionPlaylist(i, config);
+        };
+      } else {
+        playListLink.onclick = (i) => {
+          this.agregarCancionPlaylist(i, config);
+        };
+      }
+
+      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
+      if (isFavorite) {
+        favoriteLink.onclick = (i) => {
+          this.removerCancionFavoritos(i, config);
+        };
+      } else {
+        favoriteLink.onclick = (i) => {
+          this.agregarCancionFavoritos(i, config);
+        };
+      }
+
+      lineBottom.appendChild(artist);
+      lineBottom.appendChild(duration);
+
+      infoSong.appendChild(nameSong);
+      infoSong.appendChild(lineBottom);
+
+      // Crear contenedor principal de cada canción
+      const song_sngs_li = document.createElement("li");
+      song_sngs_li.setAttribute("data-id", e.id); // Agregar atributo data-id
+      song_sngs_li.className = "song plylst";
+      song_sngs_li.appendChild(numberSong);
+      song_sngs_li.appendChild(infoSong);
+      song_sngs_li.appendChild(btnContainer);
+
+      array_crearHtml.push(song_sngs_li); // Añadir el elemento html creado al array
+    });
+
+    return array_crearHtml; // Devolver el array completo con los elementos html fuera del forEach
+  }
+
+  renderHtmlPlaylist(arrayEjemp = this.Reproductor.Playlist.songs, config) {
+    try {
+      let contadorNumb = 1;
+      const elmntsLiDom = this.crearHtmlEnPlaylist(arrayEjemp);
+      const nuevoelmntsLiDom = elmntsLiDom.map((e) => {
+        const numberElement = e.querySelector(".number_song");
+        if (numberElement) {
+          // Modificar el número dentro del elemento
+          numberElement.textContent = contadorNumb++;
+          console.log("funciona el numb");
+        }
+        return e;
+      });
+
+      nuevoelmntsLiDom.forEach((e) => {
+        this.id_playlist.appendChild(e);
+      });
+
+      this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
+      this.renderHtmlFavoritos();
+    } catch (error) {
+      console.log("Error al renderizar canciones en Playlist:", error);
+    }
+  }
+
+  agregarCancionPlaylist(e, config) {
+    e.preventDefault();
+
+    const resultInsCancEncontrada = this.validarCancion(e);
+
+    this.Reproductor.Playlist.addSong(resultInsCancEncontrada);
+
+    this.renderHtmlPlaylist();
+  }
+
+  removerCancionPlaylist(e, config) {
+    e.preventDefault();
+
+    console.log("Cancion removida de la Playlist");
+
+    const resultInsCancEncontrada = this.validarCancion(e);
+
+    this.Reproductor.Playlist.removeSong(resultInsCancEncontrada);
+
+    this.renderHtmlPlaylist();
+  }
+
+  crearHtmlEnFavoritos(arrayEjemp, config = true) {
+    const array_crearHtml = []; // Array para almacenar los elementos creados
+
+    this.limpiarContenedor(this.songs_container_favoritos); // Limpia el contenedor de la seccion Playlist para actualizar las instancias de las canciones
+
+    arrayEjemp.forEach((e) => {
+      const numberSong = document.createElement("div");
+      numberSong.className = "number_song";
+      numberSong.textContent = e.numb;
+
+      const infoSong = document.createElement("div");
+      infoSong.className = "info_song";
+
+      const nameSong = document.createElement("div");
+      nameSong.className = "name_song";
+      nameSong.textContent = e.title;
+
+      const lineBottom = document.createElement("div");
+      lineBottom.className = "line_bottom";
+
+      const artist = document.createElement("div");
+      artist.className = "artist";
+      artist.textContent = e.artist;
+
+      const duration = document.createElement("div");
+      duration.className = "duration";
+      duration.textContent = "00:00";
+
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "btn_container";
+
+      const playLink = document.createElement("a");
+      playLink.href = "";
+
+      const playImg = document.createElement("img");
+      playImg.src = "src/play.svg";
+      playImg.alt = "";
+      playImg.className = "icon play";
+
+      const favoriteLink = document.createElement("a");
+      favoriteLink.href = "";
+
+      const favoriteImg = document.createElement("img");
+      favoriteImg.src = "src/favorite.svg";
+      favoriteImg.alt = "";
+      favoriteImg.className = "icon favorite";
+
+      const playListLink = document.createElement("a");
+      playListLink.href = "";
+
+      const playListImg = document.createElement("img");
+      playListImg.src = "src/play_list.svg";
+      playListImg.alt = "";
+      playListImg.className = "icon play_list";
+
+      // Construir estructura del DOM
+
+      // Iconos
+      playLink.appendChild(playImg);
+      favoriteLink.appendChild(favoriteImg);
+      playListLink.appendChild(playListImg);
+
+      // Etiquetas a
+      btnContainer.appendChild(playLink);
+      btnContainer.appendChild(favoriteLink);
+      btnContainer.appendChild(playListLink);
+
+      //Funcionalidad de los botones
+      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
+      if (isInPlaylist) {
+        playListImg.src = "src/trash_btn.svg";
+        playListLink.onclick = (i) => {
+          this.removerCancionPlaylist(i, config);
+        };
+      } else {
+        playListLink.onclick = (i) => {
+          this.agregarCancionPlaylist(i, config);
+        };
+      }
+
+      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
+      if (isFavorite) {
+        favoriteLink.onclick = (i) => {
+          this.removerCancionFavoritos(i, config);
+        };
+      } else {
+        favoriteLink.onclick = (i) => {
+          this.agregarCancionFavoritos(i, config);
+        };
+      }
+
+      lineBottom.appendChild(artist);
+      lineBottom.appendChild(duration);
+
+      infoSong.appendChild(nameSong);
+      infoSong.appendChild(lineBottom);
+
+      // Crear contenedor principal de cada canción
+      const song_sngs_li = document.createElement("li");
+      song_sngs_li.setAttribute("data-id", e.id); // Agregar atributo data-id
+      song_sngs_li.className = "song fvrts";
+      song_sngs_li.appendChild(numberSong);
+      song_sngs_li.appendChild(infoSong);
+      song_sngs_li.appendChild(btnContainer);
+
+      array_crearHtml.push(song_sngs_li); // Añadir el elemento html creado al array
+    });
+
+    return array_crearHtml; // Devolver el array completo con los elementos html fuera del forEach
+  }
+
+  renderHtmlFavoritos(arrayEjemp = this.Reproductor.Favoritos.songs, config) {
+    try {
+      let contadorNumb = 1;
+      const elmntsLiDom = this.crearHtmlEnFavoritos(arrayEjemp);
+      const nuevoelmntsLiDom = elmntsLiDom.map((e) => {
+        const numberElement = e.querySelector(".number_song");
+        if (numberElement) {
+          // Modificar el número dentro del elemento
+          numberElement.textContent = contadorNumb++;
+          console.log("funciona el numb");
+        }
+        return e;
+      });
+
+      nuevoelmntsLiDom.forEach((e) => {
+        this.songs_container_favoritos.appendChild(e);
+      });
+
+      this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
+      this.renderHtmlPlaylist();
+    } catch (error) {
+      console.log("Error al renderizar canciones en Playlist:", error);
+    }
+  }
+
+  agregarCancionFavoritos(e, config) {
+    e.preventDefault();
+    const resultInsCancEncontrada = this.validarCancion(e);
+    this.Reproductor.Favoritos.songs.push(resultInsCancEncontrada);
+    this.renderHtmlFavoritos();
+  }
+
+  removerCancionFavoritos(e, config) {
+    e.preventDefault();
+    console.log("Cancion removida de Favoritos");
+    const resultInsCancEncontrada = this.validarCancion(e);
+    this.Reproductor.Favoritos.removeSong(resultInsCancEncontrada);
+    this.renderHtmlFavoritos();
+  }
 }
 
-const seccCanciones = new Canciones("Canciones", arr_songs);
-seccCanciones.agregarCancionesACanciones(arr_songs); // Mostrar canciones en html
-console.log(seccCanciones.songs);
+class Reproductor {
+  constructor() {
+    this.InterfazGrafica = new InterfazGrafica(this);
+    this.Canciones = new Canciones({
+      nombreDeSeccion: "Canciones",
+      cancionesArr: arr_songs,
+      ExtensionInterfazGrafica: this.InterfazGrafica,
+    });
+    this.Playlist = new Playlist("Playlist", this.InterfazGrafica);
+    this.Favoritos = new Favoritos("Favoritos", this.InterfazGrafica);
+    this.InterfazGrafica.renderHtmlCanciones(); // Llamada al metodo de la clase InterfazGrafica que agrega todas las canciones al contenedor de la seccion Canciones
+  }
+}
+
+const reproductor = new Reproductor();
+
+// if (e.target.closest("#" + this.Reproductor.Canciones.id_playlist.id)) //Estamos concatenando "#" + this.Reproductor.Canciones.id_playlist.id, lo cual produce un selector CSS válido (#id_del_elemento). Esto le permite a closest() buscar el elemento adecuado en el DOM según su ID.
