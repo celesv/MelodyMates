@@ -831,8 +831,8 @@ class InterfazGrafica {
         this.songs_container_favoritos.appendChild(e);
       });
 
+      this.renderHtmlPlaylist(); // Prblemas
       this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
-      this.renderHtmlPlaylist();
     } catch (error) {
       console.log("Error al renderizar canciones en Playlist:", error);
     }
