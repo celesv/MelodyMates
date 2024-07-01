@@ -537,8 +537,8 @@ class InterfazGrafica {
         this.songs_container.appendChild(e);
       });
 
-      console.log(typeof arrayEjemp); //Cuando usas typeof para verificar el tipo de arrayEjemp, obtienes "object" porque en JavaScript, los arrays son un tipo especial de objeto. Todos los arrays en JavaScript tienen el tipo "object".
-      console.log(`¿Es un array?`, Array.isArray(arrayEjemp)); // Si deseas asegurarte de que arrayEjemp es un array, puedes usar el método Array.isArray en lugar de typeof. Esto devolverá true si arrayEjemp es un array
+      // console.log(typeof arrayEjemp); //Cuando usas typeof para verificar el tipo de arrayEjemp, obtienes "object" porque en JavaScript, los arrays son un tipo especial de objeto. Todos los arrays en JavaScript tienen el tipo "object".
+      // console.log(`¿Es un array?`, Array.isArray(arrayEjemp)); // Si deseas asegurarte de que arrayEjemp es un array, puedes usar el método Array.isArray en lugar de typeof. Esto devolverá true si arrayEjemp es un array
     } catch (error) {
       console.log("Error al renderizar canciones en Canciones:", error); //  Captura cualquier error que ocurra durante la ejecución de forEach debido a las propiedades indefinidas de las instancias de la clase Song y lo imprimirá en la consola sin detener la ejecución del programa.
     }
@@ -664,7 +664,7 @@ class InterfazGrafica {
         if (numberElement) {
           // Modificar el número dentro del elemento
           numberElement.textContent = contadorNumb++;
-          console.log("funciona el numb");
+          // console.log("funciona el numb");
         }
         return e;
       });
@@ -674,7 +674,7 @@ class InterfazGrafica {
       });
 
       this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
-      this.renderHtmlFavoritos();
+      // this.renderHtmlFavoritos();
     } catch (error) {
       console.log("Error al renderizar canciones en Playlist:", error);
     }
@@ -687,6 +687,8 @@ class InterfazGrafica {
 
     this.Reproductor.Playlist.addSong(resultInsCancEncontrada);
 
+    this.renderHtmlFavoritos();
+
     this.renderHtmlPlaylist();
   }
 
@@ -698,6 +700,8 @@ class InterfazGrafica {
     const resultInsCancEncontrada = this.validarCancion(e);
 
     this.Reproductor.Playlist.removeSong(resultInsCancEncontrada);
+
+    this.renderHtmlFavoritos();
 
     this.renderHtmlPlaylist();
   }
@@ -832,7 +836,7 @@ class InterfazGrafica {
       });
 
       this.renderHtmlPlaylist(); // Prblemas
-      this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
+      // this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
     } catch (error) {
       console.log("Error al renderizar canciones en Playlist:", error);
     }
