@@ -672,9 +672,6 @@ class InterfazGrafica {
       nuevoelmntsLiDom.forEach((e) => {
         this.id_playlist.appendChild(e);
       });
-
-      this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
-      // this.renderHtmlFavoritos();
     } catch (error) {
       console.log("Error al renderizar canciones en Playlist:", error);
     }
@@ -690,6 +687,8 @@ class InterfazGrafica {
     this.renderHtmlFavoritos();
 
     this.renderHtmlPlaylist();
+
+    this.renderHtmlCanciones();
   }
 
   removerCancionPlaylist(e, config) {
@@ -704,6 +703,7 @@ class InterfazGrafica {
     this.renderHtmlFavoritos();
 
     this.renderHtmlPlaylist();
+    this.renderHtmlCanciones();
   }
 
   crearHtmlEnFavoritos(arrayEjemp, config = true) {
@@ -834,9 +834,6 @@ class InterfazGrafica {
       nuevoelmntsLiDom.forEach((e) => {
         this.songs_container_favoritos.appendChild(e);
       });
-
-      this.renderHtmlPlaylist(); // Prblemas
-      // this.renderHtmlCanciones(); // Actualiza la lista de canciones de la sección "Canciones" con las nuevas funcionalidades de los botones
     } catch (error) {
       console.log("Error al renderizar canciones en Playlist:", error);
     }
@@ -847,6 +844,8 @@ class InterfazGrafica {
     const resultInsCancEncontrada = this.validarCancion(e);
     this.Reproductor.Favoritos.songs.push(resultInsCancEncontrada);
     this.renderHtmlFavoritos();
+    this.renderHtmlPlaylist();
+    this.renderHtmlCanciones();
   }
 
   removerCancionFavoritos(e, config) {
@@ -855,6 +854,8 @@ class InterfazGrafica {
     const resultInsCancEncontrada = this.validarCancion(e);
     this.Reproductor.Favoritos.removeSong(resultInsCancEncontrada);
     this.renderHtmlFavoritos();
+    this.renderHtmlPlaylist();
+    this.renderHtmlCanciones();
   }
 }
 
