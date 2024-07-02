@@ -345,13 +345,20 @@ class Playlist {
   }
 
   addSong(e) {
-    this.songs.push(e);
+    this.songs.push({ ...e });
+    // Añadir una copia de la canción a la lista
   }
-
   removeSong(e) {
-    const index = this.songs.indexOf(e);
-    if (index === -1) return; // Esto indica que no encontró la canción
-    this.songs.splice(index, 1); // Si existe la canción, se borra usando su posición(index), solo ese elemento ('1')
+    // Buscar la canción en la lista de reproducción y removerla
+    const indexInPlaylist = this.songs.findIndex((song) => song.id === e.id); //findIndex() es una función de comparación personalizada (song.id === e.id).
+
+    // indexOf() usa una comparación directa del objeto.
+
+    if (indexInPlaylist !== -1) {
+      this.songs.splice(indexInPlaylist, 1);
+    }
+
+    // si estás trabajando con copias de las canciones en el array de la lista de reproducción (Playlist), entonces indexOf() con una comparación directa del objeto ya no funcionaría correctamente. Esto se debe a que indexOf() busca coincidencias exactas de objetos en el array, y las copias de objetos no serán consideradas iguales a las instancias originales.
   }
 }
 
@@ -362,13 +369,16 @@ class Favoritos {
     this.songs = [];
   }
   addSong(e) {
-    this.songs.push(e);
+    this.songs.push({ ...e });
+    // Añadir una copia de la canción a la lista
   }
 
   removeSong(e) {
-    const index = this.songs.indexOf(e);
-    if (index === -1) return; // Esto indica que no encontró la canción
-    this.songs.splice(index, 1); // Si existe la canción, se borra usando su posición(index), solo ese elemento ('1')
+    // Buscar la canción en la lista de reproducción y removerla
+    const indexInPlaylist = this.songs.findIndex((song) => song.id === e.id); //findIndex() es una función de comparación personalizada (song.id === e.id).
+    if (indexInPlaylist !== -1) {
+      this.songs.splice(indexInPlaylist, 1);
+    }
   }
 }
 
@@ -453,7 +463,9 @@ class InterfazGrafica {
       playImg.className = "icon";
 
       // Recuperar el estado del botón desde localStorage
-      const storedState = sessionStorage.getItem(`isPlaying-${e.id}`);
+      const storedState = sessionStorage.getItem(
+        `isPlayingInCanciones-${e.id}`
+      );
       const isPlaying = storedState === "true";
       playImg.classList.add(isPlaying ? "iconPause" : "play");
 
@@ -494,12 +506,15 @@ class InterfazGrafica {
 
         // Limpiar sessionStorage
         arrayEjemp.forEach((s) => {
-          sessionStorage.setItem(`isPlaying-${s.id}`, false);
+          sessionStorage.setItem(`isPlayingInCanciones-${s.id}`, false);
         });
 
         // Guardar el estado actual en localStorage
         const currentPlayingState = playImg.classList.contains("play");
-        sessionStorage.setItem(`isPlaying-${e.id}`, currentPlayingState);
+        sessionStorage.setItem(
+          `isPlayingInCanciones-${e.id}`,
+          currentPlayingState
+        );
 
         // Restablecer todos los iconos de reproducción
         const allPlayImgs = document.querySelectorAll(".iconPause");
@@ -516,8 +531,10 @@ class InterfazGrafica {
           !this.Reproductor.reproductorDeAudio.paused
         ) {
           playImg.classList.toggle("iconPause");
-          sessionStorage.setItem(`isPlaying-${e.id}`, true);
+          sessionStorage.setItem(`isPlayingInCanciones-${e.id}`, true);
         }
+
+        // Reproducir o pausar la cancion
 
         if (this.Reproductor.currentSong === e) {
           if (this.Reproductor.reproductorDeAudio.paused) {
@@ -537,7 +554,14 @@ class InterfazGrafica {
       };
 
       // Boton Playlist
-      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
+
+      // const isInPlaylist = this.Reproductor.Playlist.songs.includes(e); // Al usar this.songs.push({ ...e }); para hacer una copia de la instancia, esta validacion ya no funcionaria.
+
+      // Función de cómo validar si una canción está en la Playlist
+      const isInPlaylist = this.Reproductor.Playlist.songs.some((song) =>
+        this.compareSongs(song, e)
+      );
+
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
@@ -550,7 +574,13 @@ class InterfazGrafica {
       }
 
       // Boton Favoritos
-      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
+      // const isFavorite = this.Reproductor.Favoritos.songs.includes(e); // Al usar this.songs.push({ ...e }); para hacer una copia de la instancia, esta validacion ya no funcionaria.
+
+      // Función de cómo validar si una canción está en la Playlist
+      const isFavorite = this.Reproductor.Favoritos.songs.some((song) =>
+        this.compareSongs(song, e)
+      );
+
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
           this.removerCancionFavoritos(i, config);
@@ -579,6 +609,11 @@ class InterfazGrafica {
     });
 
     return array_crearHtml; // Devolver el array completo fuera del forEach
+  }
+
+  compareSongs(song1, song2) {
+    // Aquí se asume que las canciones tienen un campo 'id' único
+    return song1.id === song2.id;
   }
 
   renderHtmlCanciones(arrayEjemp = this.Reproductor.Canciones.songs, config) {
@@ -634,7 +669,7 @@ class InterfazGrafica {
       playImg.className = "icon";
 
       // Recuperar el estado del botón desde localStorage
-      const storedState = sessionStorage.getItem(`isPlaying-${e.id}`);
+      const storedState = sessionStorage.getItem(`isPlayingInPlaylist-${e.id}`);
       const isPlaying = storedState === "true";
       playImg.classList.add(isPlaying ? "iconPause" : "play");
 
@@ -675,12 +710,15 @@ class InterfazGrafica {
 
         // Limpiar sessionStorage
         arrayEjemp.forEach((s) => {
-          sessionStorage.setItem(`isPlaying-${s.id}`, false);
+          sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
         });
 
         // Guardar el estado actual en localStorage
         const currentPlayingState = playImg.classList.contains("play");
-        sessionStorage.setItem(`isPlaying-${e.id}`, currentPlayingState);
+        sessionStorage.setItem(
+          `isPlayingInPlaylist-${e.id}`,
+          currentPlayingState
+        );
 
         // Restablecer todos los iconos de reproducción
         const allPlayImgs = document.querySelectorAll(".iconPause");
@@ -697,7 +735,7 @@ class InterfazGrafica {
           !this.Reproductor.reproductorDeAudio.paused
         ) {
           playImg.classList.toggle("iconPause");
-          sessionStorage.setItem(`isPlaying-${e.id}`, true);
+          sessionStorage.setItem(`isPlayingInPlaylist-${e.id}`, true);
         }
 
         if (this.Reproductor.currentSong === e) {
@@ -717,7 +755,10 @@ class InterfazGrafica {
         }
       };
 
-      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
+      const isInPlaylist = this.Reproductor.Playlist.songs.some((song) =>
+        this.compareSongs(song, e)
+      );
+
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
@@ -729,7 +770,10 @@ class InterfazGrafica {
         };
       }
 
-      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
+      const isFavorite = this.Reproductor.Favoritos.songs.some((song) =>
+        this.compareSongs(song, e)
+      );
+
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
           this.removerCancionFavoritos(i, config);
@@ -846,10 +890,15 @@ class InterfazGrafica {
       playLink.href = "";
       playLink.setAttribute("data-src", e.audioSrc); // Usar data-src en lugar de href
 
-      const playImg = document.createElement("img");
-      // playImg.src = "src/play.svg";
-      playImg.alt = "";
+      const playImg = document.createElement("div");
       playImg.className = "icon";
+
+      // Recuperar el estado del botón desde localStorage
+      const storedState = sessionStorage.getItem(
+        `isPlayingInFavoritos-${e.id}`
+      );
+      const isPlaying = storedState === "true";
+      playImg.classList.add(isPlaying ? "iconPause" : "play");
 
       const favoriteLink = document.createElement("a");
       favoriteLink.href = "";
@@ -883,10 +932,59 @@ class InterfazGrafica {
 
       // Boton Reproducir
       playLink.onclick = (i) => {
-        this.Reproductor.playAudio(i, e);
+        i.preventDefault();
+
+        // Limpiar sessionStorage
+        arrayEjemp.forEach((s) => {
+          sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+        });
+
+        // Guardar el estado actual en localStorage
+        const currentPlayingState = playImg.classList.contains("play");
+        sessionStorage.setItem(
+          `isPlayingInFavoritos-${e.id}`,
+          currentPlayingState
+        );
+
+        // Restablecer todos los iconos de reproducción
+        const allPlayImgs = document.querySelectorAll(".iconPause");
+        allPlayImgs.forEach((icon) => {
+          icon.classList.remove("iconPause");
+          icon.classList.add("play");
+        });
+
+        // Alternar el icono de reproducción
+        playImg.classList.toggle("iconPause");
+
+        if (
+          this.Reproductor.currentSong === e &&
+          !this.Reproductor.reproductorDeAudio.paused
+        ) {
+          playImg.classList.toggle("iconPause");
+          sessionStorage.setItem(`isPlayingInFavoritos-${e.id}`, true);
+        }
+
+        if (this.Reproductor.currentSong === e) {
+          if (this.Reproductor.reproductorDeAudio.paused) {
+            const resumeTime = this.Reproductor.reproductorDeAudio.currentTime; // Guardar la posición actual de reproducción
+            this.Reproductor.playAudio();
+            this.Reproductor.reproductorDeAudio.currentTime = resumeTime; // Reanudar desde la posición guardada
+
+            // Se guarda la posición actual de reproducción en resumeTime, luego se inicia la reproducción llamando a this.Reproductor.playAudio(i, e) y se restaura la posición de reproducción a resumeTime.
+          } else {
+            this.Reproductor.pauseAudio();
+          }
+        } else {
+          this.Reproductor.currentSong = e;
+          this.Reproductor.reproductorDeAudio.src = e.audioSrc;
+          this.Reproductor.playAudio();
+        }
       };
 
-      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
+      const isInPlaylist = this.Reproductor.Playlist.songs.some((song) =>
+        this.compareSongs(song, e)
+      );
+
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
@@ -898,7 +996,10 @@ class InterfazGrafica {
         };
       }
 
-      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
+      const isFavorite = this.Reproductor.Favoritos.songs.some((song) =>
+        this.compareSongs(song, e)
+      );
+
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
           this.removerCancionFavoritos(i, config);
