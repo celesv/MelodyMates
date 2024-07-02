@@ -200,7 +200,7 @@ input[type="text"][id="input_search"] {
 }
 
 .artist {
-flex: 7;
+  flex: 7;
 }
 
 .duration {
@@ -213,6 +213,21 @@ flex: 7;
   align-items: center;
   gap: 8px;
   margin-right: 20px;
+}
+
+.play {
+  background-image: url(src/play.svg);
+  width: 20px;
+  height: 21px;
+  background-size: cover;
+}
+
+.iconPause {
+  background-image: url(src/pause.svg);
+  width: 20px;
+  height: 22px;
+  background-size: cover;
+
 }
 
 .songs_container {
@@ -382,7 +397,7 @@ flex: 7;
   margin-left: -70px;
 }
 
-.not_volume{
+.not_volume {
   display: none;
 }
 
@@ -440,7 +455,7 @@ i {
     -moz-border-radius: 100;
     -ms-border-radius: 100;
     -o-border-radius: 100;
-}
+  }
 }
 
 .input-icon {
@@ -456,7 +471,7 @@ i {
     -moz-border-radius: 100px;
     -ms-border-radius: 100px;
     -o-border-radius: 100px;
-}
+  }
 
   i {
     position: absolute;

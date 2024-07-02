@@ -1,3 +1,15 @@
+window.onload = function () {
+  // Limpiar sessionStorage cuando se recarga la página
+  sessionStorage.clear();
+
+  // Restablecer absolutamente todos los iconos de reproducción; ya que siempre quedaba alguno rezagado
+  const allPlayImgs = document.querySelectorAll(".iconPause");
+  allPlayImgs.forEach((icon) => {
+    icon.classList.remove("iconPause");
+    icon.classList.add("play");
+  });
+};
+
 class Song {
   static number = 1; // Propiedad estática, compartida entre todas las instancias
   constructor({
@@ -370,20 +382,6 @@ class Canciones {
     this.songs = cancionesArr;
     this.Ext_InterfazGrafica = ExtensionInterfazGrafica;
   }
-
-  clicFavoritos() {
-    const favoriteLink = document.querySelectorAll("a>img.favorite");
-    favoriteLink.forEach((i) => {
-      i.addEventListener("click", (e) => {
-        e.preventDefault();
-        const targetElement = e.target.closest("li.song");
-        if (targetElement) {
-          const songId = targetElement.getAttribute("data-id");
-          console.log("ID de la canción:", songId);
-        }
-      });
-    });
-  }
 }
 class InterfazGrafica {
   constructor(instanciaReproductor) {
@@ -449,11 +447,15 @@ class InterfazGrafica {
 
       const playLink = document.createElement("a");
       playLink.href = "";
+      playLink.setAttribute("data-src", e.audioSrc); // Usar data-src en lugar de href
 
-      const playImg = document.createElement("img");
-      playImg.src = "src/play.svg";
-      playImg.alt = "";
-      playImg.className = "icon play";
+      const playImg = document.createElement("div");
+      playImg.className = "icon";
+
+      // Recuperar el estado del botón desde localStorage
+      const storedState = sessionStorage.getItem(`isPlaying-${e.id}`);
+      const isPlaying = storedState === "true";
+      playImg.classList.add(isPlaying ? "iconPause" : "play");
 
       const favoriteLink = document.createElement("a");
       favoriteLink.href = "";
@@ -484,6 +486,55 @@ class InterfazGrafica {
       btnContainer.appendChild(playListLink);
 
       //Funcionalidad de los botones
+
+      // Boton Reproducir
+
+      playLink.onclick = (i) => {
+        i.preventDefault();
+
+        // Limpiar sessionStorage
+        arrayEjemp.forEach((s) => {
+          sessionStorage.setItem(`isPlaying-${s.id}`, false);
+        });
+
+        // Guardar el estado actual en localStorage
+        const currentPlayingState = playImg.classList.contains("play");
+        sessionStorage.setItem(`isPlaying-${e.id}`, currentPlayingState);
+
+        // Restablecer todos los iconos de reproducción
+        const allPlayImgs = document.querySelectorAll(".iconPause");
+        allPlayImgs.forEach((icon) => {
+          icon.classList.remove("iconPause");
+          icon.classList.add("play");
+        });
+
+        // Alternar el icono de reproducción
+        playImg.classList.toggle("iconPause");
+
+        if (
+          this.Reproductor.currentSong === e &&
+          !this.Reproductor.reproductorDeAudio.paused
+        ) {
+          playImg.classList.toggle("iconPause");
+          sessionStorage.setItem(`isPlaying-${e.id}`, true);
+        }
+
+        if (this.Reproductor.currentSong === e) {
+          if (this.Reproductor.reproductorDeAudio.paused) {
+            const resumeTime = this.Reproductor.reproductorDeAudio.currentTime; // Guardar la posición actual de reproducción
+            this.Reproductor.playAudio();
+            this.Reproductor.reproductorDeAudio.currentTime = resumeTime; // Reanudar desde la posición guardada
+
+            // Se guarda la posición actual de reproducción en resumeTime, luego se inicia la reproducción llamando a this.Reproductor.playAudio(i, e) y se restaura la posición de reproducción a resumeTime.
+          } else {
+            this.Reproductor.pauseAudio();
+          }
+        } else {
+          this.Reproductor.currentSong = e;
+          this.Reproductor.reproductorDeAudio.src = e.audioSrc;
+          this.Reproductor.playAudio();
+        }
+      };
 
       // Boton Playlist
       const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
@@ -537,8 +588,8 @@ class InterfazGrafica {
         this.songs_container.appendChild(e);
       });
 
-      // console.log(typeof arrayEjemp); //Cuando usas typeof para verificar el tipo de arrayEjemp, obtienes "object" porque en JavaScript, los arrays son un tipo especial de objeto. Todos los arrays en JavaScript tienen el tipo "object".
-      // console.log(`¿Es un array?`, Array.isArray(arrayEjemp)); // Si deseas asegurarte de que arrayEjemp es un array, puedes usar el método Array.isArray en lugar de typeof. Esto devolverá true si arrayEjemp es un array
+      console.log(typeof arrayEjemp); //Cuando usas typeof para verificar el tipo de arrayEjemp, obtienes "object" porque en JavaScript, los arrays son un tipo especial de objeto. Todos los arrays en JavaScript tienen el tipo "object".
+      console.log(`¿Es un array?`, Array.isArray(arrayEjemp)); // Si deseas asegurarte de que arrayEjemp es un array, puedes usar el método Array.isArray en lugar de typeof. Esto devolverá true si arrayEjemp es un array
     } catch (error) {
       console.log("Error al renderizar canciones en Canciones:", error); //  Captura cualquier error que ocurra durante la ejecución de forEach debido a las propiedades indefinidas de las instancias de la clase Song y lo imprimirá en la consola sin detener la ejecución del programa.
     }
@@ -577,11 +628,15 @@ class InterfazGrafica {
 
       const playLink = document.createElement("a");
       playLink.href = "";
+      playLink.setAttribute("data-src", e.audioSrc); // Usar data-src en lugar de href
 
-      const playImg = document.createElement("img");
-      playImg.src = "src/play.svg";
-      playImg.alt = "";
-      playImg.className = "icon play";
+      const playImg = document.createElement("div");
+      playImg.className = "icon";
+
+      // Recuperar el estado del botón desde localStorage
+      const storedState = sessionStorage.getItem(`isPlaying-${e.id}`);
+      const isPlaying = storedState === "true";
+      playImg.classList.add(isPlaying ? "iconPause" : "play");
 
       const favoriteLink = document.createElement("a");
       favoriteLink.href = "";
@@ -612,6 +667,56 @@ class InterfazGrafica {
       btnContainer.appendChild(playListLink);
 
       //Funcionalidad de los botones
+
+      // Boton Reproducir
+
+      playLink.onclick = (i) => {
+        i.preventDefault();
+
+        // Limpiar sessionStorage
+        arrayEjemp.forEach((s) => {
+          sessionStorage.setItem(`isPlaying-${s.id}`, false);
+        });
+
+        // Guardar el estado actual en localStorage
+        const currentPlayingState = playImg.classList.contains("play");
+        sessionStorage.setItem(`isPlaying-${e.id}`, currentPlayingState);
+
+        // Restablecer todos los iconos de reproducción
+        const allPlayImgs = document.querySelectorAll(".iconPause");
+        allPlayImgs.forEach((icon) => {
+          icon.classList.remove("iconPause");
+          icon.classList.add("play");
+        });
+
+        // Alternar el icono de reproducción
+        playImg.classList.toggle("iconPause");
+
+        if (
+          this.Reproductor.currentSong === e &&
+          !this.Reproductor.reproductorDeAudio.paused
+        ) {
+          playImg.classList.toggle("iconPause");
+          sessionStorage.setItem(`isPlaying-${e.id}`, true);
+        }
+
+        if (this.Reproductor.currentSong === e) {
+          if (this.Reproductor.reproductorDeAudio.paused) {
+            const resumeTime = this.Reproductor.reproductorDeAudio.currentTime; // Guardar la posición actual de reproducción
+            this.Reproductor.playAudio();
+            this.Reproductor.reproductorDeAudio.currentTime = resumeTime; // Reanudar desde la posición guardada
+
+            // Se guarda la posición actual de reproducción en resumeTime, luego se inicia la reproducción llamando a this.Reproductor.playAudio(i, e) y se restaura la posición de reproducción a resumeTime.
+          } else {
+            this.Reproductor.pauseAudio();
+          }
+        } else {
+          this.Reproductor.currentSong = e;
+          this.Reproductor.reproductorDeAudio.src = e.audioSrc;
+          this.Reproductor.playAudio();
+        }
+      };
+
       const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
@@ -664,7 +769,7 @@ class InterfazGrafica {
         if (numberElement) {
           // Modificar el número dentro del elemento
           numberElement.textContent = contadorNumb++;
-          // console.log("funciona el numb");
+          console.log("funciona el numb");
         }
         return e;
       });
@@ -739,11 +844,12 @@ class InterfazGrafica {
 
       const playLink = document.createElement("a");
       playLink.href = "";
+      playLink.setAttribute("data-src", e.audioSrc); // Usar data-src en lugar de href
 
       const playImg = document.createElement("img");
-      playImg.src = "src/play.svg";
+      // playImg.src = "src/play.svg";
       playImg.alt = "";
-      playImg.className = "icon play";
+      playImg.className = "icon";
 
       const favoriteLink = document.createElement("a");
       favoriteLink.href = "";
@@ -774,6 +880,12 @@ class InterfazGrafica {
       btnContainer.appendChild(playListLink);
 
       //Funcionalidad de los botones
+
+      // Boton Reproducir
+      playLink.onclick = (i) => {
+        this.Reproductor.playAudio(i, e);
+      };
+
       const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
@@ -870,6 +982,23 @@ class Reproductor {
     this.Playlist = new Playlist("Playlist", this.InterfazGrafica);
     this.Favoritos = new Favoritos("Favoritos", this.InterfazGrafica);
     this.InterfazGrafica.renderHtmlCanciones(); // Llamada al metodo de la clase InterfazGrafica que agrega todas las canciones al contenedor de la seccion Canciones
+    this.imput_search = document.getElementById("input_search");
+    this.reproductorDeAudio = new Audio();
+    this.reproductorDeAudio.volume = 0.2;
+    this.currentSong = null; // Para rastrear la canción actual. Inicialización como null para indicar que ninguna canción se está reproduciendo al principio
+  }
+
+  playAudio() {
+    // const getSongId = e.target.closest("li.song").getAttribute("data-id");
+    // const instanciaSong = this.Canciones.songs.find(
+    //   (i) => i.id === parseInt(getSongId)
+    // ); // Todas estas validaciones que habia hecho para encontrar el id de la cancion y a su vez hallar la instancia de la cancion en su respectivo array, no era necesario porque al usar el forEach se tenia acceso a la instancia y aunque el eventlistener escucha el evento clic sobre el DOM (i) como es un callback de una funcion tambien podia pasar la instancia de la cancion (e) como argumento en el callback de la funcion.
+
+    this.reproductorDeAudio.play();
+  }
+
+  pauseAudio() {
+    this.reproductorDeAudio.pause();
   }
 }
 
