@@ -525,13 +525,15 @@ class InterfazGrafica {
 
         // Alternar el icono de reproducción
         playImg.classList.toggle("iconPause");
+        playImg.classList.toggle("play"); 
 
         if (
           this.Reproductor.currentSong === e &&
           !this.Reproductor.reproductorDeAudio.paused
         ) {
-          playImg.classList.toggle("iconPause");
-          sessionStorage.setItem(`isPlayingInCanciones-${e.id}`, true);
+          playImg.classList.remove("iconPause");
+          playImg.classList.add("play");
+          sessionStorage.setItem(`isPlayingInPlaylist-${e.id}`, "false");
         }
 
         // Reproducir o pausar la cancion
@@ -565,6 +567,10 @@ class InterfazGrafica {
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
+          // Limpiar sessionStorage
+          arrayEjemp.forEach((s) => {
+            sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          });
           this.removerCancionPlaylist(i, config);
         };
       } else {
@@ -583,6 +589,10 @@ class InterfazGrafica {
 
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
+          // Limpiar sessionStorage
+          arrayEjemp.forEach((s) => {
+            sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          });
           this.removerCancionFavoritos(i, config);
         };
       } else {
@@ -711,7 +721,12 @@ class InterfazGrafica {
         // Limpiar sessionStorage
         arrayEjemp.forEach((s) => {
           sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          sessionStorage.setItem(`isPlayingInCanciones-${s.id}`, false);
+          sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+
+
         });
+        
 
         // Guardar el estado actual en localStorage
         const currentPlayingState = playImg.classList.contains("play");
@@ -729,13 +744,15 @@ class InterfazGrafica {
 
         // Alternar el icono de reproducción
         playImg.classList.toggle("iconPause");
+        playImg.classList.toggle("play"); //Reciente agregado
 
         if (
           this.Reproductor.currentSong === e &&
           !this.Reproductor.reproductorDeAudio.paused
         ) {
-          playImg.classList.toggle("iconPause");
-          sessionStorage.setItem(`isPlayingInPlaylist-${e.id}`, true);
+          playImg.classList.remove("iconPause");
+          playImg.classList.add("play");
+          sessionStorage.setItem(`isPlayingInPlaylist-${e.id}`, "false");
         }
 
         if (this.Reproductor.currentSong === e) {
@@ -762,6 +779,10 @@ class InterfazGrafica {
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
+          // Limpiar sessionStorage
+          arrayEjemp.forEach((s) => {
+            sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          });
           this.removerCancionPlaylist(i, config);
         };
       } else {
@@ -776,6 +797,10 @@ class InterfazGrafica {
 
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
+          // Limpiar sessionStorage
+          arrayEjemp.forEach((s) => {
+            sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          });
           this.removerCancionFavoritos(i, config);
         };
       } else {
@@ -937,6 +962,9 @@ class InterfazGrafica {
         // Limpiar sessionStorage
         arrayEjemp.forEach((s) => {
           sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          sessionStorage.setItem(`isPlayingInCanciones-${s.id}`, false);
+          sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+
         });
 
         // Guardar el estado actual en localStorage
@@ -955,13 +983,15 @@ class InterfazGrafica {
 
         // Alternar el icono de reproducción
         playImg.classList.toggle("iconPause");
+        playImg.classList.toggle("play"); //Reciente agregado
 
         if (
           this.Reproductor.currentSong === e &&
           !this.Reproductor.reproductorDeAudio.paused
         ) {
-          playImg.classList.toggle("iconPause");
-          sessionStorage.setItem(`isPlayingInFavoritos-${e.id}`, true);
+          playImg.classList.remove("iconPause");
+          playImg.classList.add("play");
+          sessionStorage.setItem(`isPlayingInFavoritos-${e.id}`, "false");
         }
 
         if (this.Reproductor.currentSong === e) {
@@ -988,6 +1018,10 @@ class InterfazGrafica {
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
+          // Limpiar sessionStorage
+          arrayEjemp.forEach((s) => {
+            sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          });
           this.removerCancionPlaylist(i, config);
         };
       } else {
@@ -1002,6 +1036,10 @@ class InterfazGrafica {
 
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
+          // Limpiar sessionStorage
+          arrayEjemp.forEach((s) => {
+            sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          });
           this.removerCancionFavoritos(i, config);
         };
       } else {
@@ -1055,7 +1093,7 @@ class InterfazGrafica {
   agregarCancionFavoritos(e, config) {
     e.preventDefault();
     const resultInsCancEncontrada = this.validarCancion(e);
-    this.Reproductor.Favoritos.songs.push(resultInsCancEncontrada);
+    this.Reproductor.Favoritos.addSong(resultInsCancEncontrada);
     this.renderHtmlFavoritos();
     this.renderHtmlPlaylist();
     this.renderHtmlCanciones();
