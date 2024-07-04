@@ -37,7 +37,7 @@ class Song {
 const arr_songs = [
   new Song({
     idEstatico: 1,
-    titulo: "Spanish Eddie",
+    titulo: "Spanish Eddie Guardians",
     artista: "Laura Branigan",
     imagen: "music/Cover_Spanish_Eddie.png",
     audio: "music/Spanish_Eddie.mp3",
@@ -349,7 +349,7 @@ class Playlist {
     // Añadir una copia de la canción a la lista
   }
   removeSong(e) {
-    // Buscar la canción en la lista de reproducción y removerla
+    // Buscar la canción en la lista de canciones del Playlist y removerla
     const indexInPlaylist = this.songs.findIndex((song) => song.id === e.id); //findIndex() es una función de comparación personalizada (song.id === e.id).
 
     // indexOf() usa una comparación directa del objeto.
@@ -358,7 +358,9 @@ class Playlist {
       this.songs.splice(indexInPlaylist, 1);
     }
 
-    // si estás trabajando con copias de las canciones en el array de la lista de reproducción (Playlist), entonces indexOf() con una comparación directa del objeto ya no funcionaría correctamente. Esto se debe a que indexOf() busca coincidencias exactas de objetos en el array, y las copias de objetos no serán consideradas iguales a las instancias originales.
+    // Si estás trabajando con copias de las canciones en el array de la lista de reproducción (Playlist) y ene el array de canciones de Favoritos, entonces indexOf() con una comparación directa del objeto ya no funcionaría correctamente. Esto se debe a que indexOf() busca coincidencias exactas de objetos en el array, y las copias de objetos no serán consideradas iguales a las instancias originales.
+    // Es por eso que seria necesaria la comparacion personalizada de los id. La función findIndex() busca la canción en el array Playlist.songs utilizando su id, si encuentra la canción la elimina del array Playlist.songs.
+    // Bastaria con usar el indexOf() solo si el html que se esta creando es del mismo Playlist, por lo que la instancia (e) que usa pertenece al propio array Playlist. Pero como este metodo se esta usando tanto para las secciones de Canciones como de Favoritos, lo dejare tal cual porque funciona igual.
   }
 }
 
@@ -374,7 +376,7 @@ class Favoritos {
   }
 
   removeSong(e) {
-    // Buscar la canción en la lista de reproducción y removerla
+    // Buscar la canción en la lista de canciones de Favoritos y removerla
     const indexInPlaylist = this.songs.findIndex((song) => song.id === e.id); //findIndex() es una función de comparación personalizada (song.id === e.id).
     if (indexInPlaylist !== -1) {
       this.songs.splice(indexInPlaylist, 1);
@@ -401,6 +403,43 @@ class InterfazGrafica {
     this.id_playlist = document.getElementById("id_playlist");
     this.songs_container_favoritos =
       document.getElementsByClassName("songs_container")[2];
+    this.imput_search = document.getElementById("input_search");
+  }
+
+  buscarCancion() {
+    this.imput_search.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const term = e.target.value.trim();
+
+        if (term !== "") {
+          this.filtrarCanciones(this.Reproductor.Canciones.songs, term);
+        }
+      }
+    });
+
+    this.imput_search.addEventListener("input", (e) => {
+      const term = e.target.value.trim();
+
+      if (term === "") {
+        this.renderHtmlCanciones(this.Reproductor.Canciones.songs);
+      }
+    });
+  }
+
+  //Cuando defines un método en un objeto (como buscarCancion()), normalmente esperas que this se refiera al objeto en el que se define el método.
+  // Las funciones normales (function (e)) tienen su propio contexto de this y no heredan el contexto del objeto donde están definidas.  Por eso cuando intentas acceder a this.Reproductor.Canciones.songs, el valor de this ya no se refiere al objeto donde se define buscarCancion().
+  // Puedes utilizar una función de flecha (arrow function (e) => {}), que captura el contexto this de su entorno léxico (el objeto donde se define buscarCancion()).
+  // function (e) { ... } se reemplaza por (e) => { ... }. La función de flecha no tiene su propio contexto this, sino que captura el contexto this de buscarCancion(), asegurando que this.Reproductor.Canciones.songs se resuelva correctamente.
+
+  filtrarCanciones(array, e) {
+    const resp_arr = array.filter((j) => {
+      return (
+        j.title.toLowerCase().includes(e.toLowerCase()) ||
+        j.artist.toLowerCase().includes(e.toLowerCase())
+      );
+    });
+
+    this.renderHtmlCanciones(resp_arr);
   }
 
   limpiarContenedor(e) {
@@ -504,10 +543,49 @@ class InterfazGrafica {
       playLink.onclick = (i) => {
         i.preventDefault();
 
-        // Limpiar sessionStorage
-        arrayEjemp.forEach((s) => {
-          sessionStorage.setItem(`isPlayingInCanciones-${s.id}`, false);
-        });
+        // Si habia una canción anterior reproduciendose inmediatmaente antes de reproducir esta, actualizar su estado en sessionStorage a false
+        if (
+          this.Reproductor.previousSong &&
+          this.Reproductor.previousSong !== e
+        ) {
+          const cancionPrevia = this.Reproductor.previousSong;
+
+          console.log("Canción previa desde playLink.onclick:", cancionPrevia);
+
+          // Verificar en cuál lista estaba la canción reproducida anteriormente
+          if (
+            this.Reproductor.Canciones.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInCanciones-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+
+          if (
+            this.Reproductor.Playlist.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInPlaylist-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+
+          if (
+            this.Reproductor.Favoritos.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInFavoritos-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+        } // Al añadir this.Reproductor.previousSong antes de acceder a this.Reproductor.previousSong.id, te aseguras de que la operación de acceso a id solo se realiza si this.Reproductor.previousSong no es null ni undefined. Esto es una práctica común en JavaScript para evitar errores de tipo TypeError ya que puede ser que esa propiedad aun no este inicializada. Para evitar este error, es necesario realizar la comparación con this.Reproductor.previousSong de manera que primero verifiques que this.Reproductor.previousSong no sea null o undefined antes de intentar acceder a su propiedad id.
 
         // Guardar el estado actual en localStorage
         const currentPlayingState = playImg.classList.contains("play");
@@ -525,7 +603,7 @@ class InterfazGrafica {
 
         // Alternar el icono de reproducción
         playImg.classList.toggle("iconPause");
-        playImg.classList.toggle("play"); 
+        playImg.classList.toggle("play");
 
         if (
           this.Reproductor.currentSong === e &&
@@ -533,7 +611,7 @@ class InterfazGrafica {
         ) {
           playImg.classList.remove("iconPause");
           playImg.classList.add("play");
-          sessionStorage.setItem(`isPlayingInPlaylist-${e.id}`, "false");
+          sessionStorage.setItem(`isPlayingInCanciones-${e.id}`, "false");
         }
 
         // Reproducir o pausar la cancion
@@ -567,10 +645,11 @@ class InterfazGrafica {
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
-          // Limpiar sessionStorage
-          arrayEjemp.forEach((s) => {
-            sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
-          });
+          // // Limpiar sessionStorage
+          // arrayEjemp.forEach((s) => {
+          //   sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          // });
+
           this.removerCancionPlaylist(i, config);
         };
       } else {
@@ -589,10 +668,11 @@ class InterfazGrafica {
 
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
-          // Limpiar sessionStorage
-          arrayEjemp.forEach((s) => {
-            sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
-          });
+          // // Limpiar sessionStorage
+          // arrayEjemp.forEach((s) => {
+          //   sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          // });
+
           this.removerCancionFavoritos(i, config);
         };
       } else {
@@ -619,6 +699,61 @@ class InterfazGrafica {
     });
 
     return array_crearHtml; // Devolver el array completo fuera del forEach
+  }
+
+  currentSongNowPlaying() {
+    if (!this.Reproductor.currentSong) {
+      console.log("No hay cancion sonando");
+      return false;
+    } // Manejar de alguna manera cuando no están inicializados
+    // El error TypeError: Cannot read properties of undefined (reading 'id') indica que this.Reproductor.currentSong o alguna canción en this.Reproductor.Canciones.songs es undefined. Esto sucede cuando intentas acceder a una propiedad (id en este caso) de un objeto que no está definido. Para evitar este error, debes asegurarte de que tanto this.Reproductor.currentSong como las canciones en this.Reproductor.Canciones.songs (O de cualquier otra sección como Playlist o Favoritos) estén inicializados correctamente y tengan valores válidos antes de intentar acceder a sus propiedades. Para esto, es necesaria esta validación.
+
+    const currentSongNow = this.Reproductor.currentSong;
+
+    const currentSongNowId = this.Reproductor.currentSong.id;
+
+    // Imprimir para depurar
+    console.log(
+      currentSongNow.title + "\n" + "Current Song ID:",
+      currentSongNowId
+    );
+    // console.log(`${currentSongNow}\nCurrent Song ID: ${currentSongNowId}`);
+
+    // Verificar si la canción actualmente en reproducción está en el array de Favoritos
+    const favoriteSong = this.Reproductor.Favoritos.songs.find(
+      (song) => song === currentSongNow
+    );
+
+    // Verificar si la canción actualmente en reproducción está en el array de Playlist
+    const playlistSong = this.Reproductor.Playlist.songs.find(
+      (song) => song === currentSongNow
+    );
+
+    // Verificar si la canción actualmente en reproducción está en el array de Canciones
+    const cancionesSong = this.Reproductor.Canciones.songs.find(
+      (song) => song === currentSongNow
+    );
+
+    // Imprimir solo la canción que está sonando
+    if (favoriteSong) {
+      console.log(
+        "La canción que está sonando está en Favoritos:",
+        favoriteSong
+      );
+      return favoriteSong;
+    } else if (playlistSong) {
+      console.log(
+        "La canción que está sonando está en Playlist:",
+        playlistSong
+      );
+      return playlistSong;
+    } else if (cancionesSong) {
+      console.log(
+        "La canción que está sonando está en Canciones:",
+        cancionesSong
+      );
+      return cancionesSong;
+    }
   }
 
   compareSongs(song1, song2) {
@@ -718,15 +853,50 @@ class InterfazGrafica {
       playLink.onclick = (i) => {
         i.preventDefault();
 
-        // Limpiar sessionStorage
-        arrayEjemp.forEach((s) => {
-          sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
-          sessionStorage.setItem(`isPlayingInCanciones-${s.id}`, false);
-          sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+         // Si habia una canción anterior reproduciendose inmediatmaente antes de reproducir esta, actualizar su estado en sessionStorage a false
+         if (
+          this.Reproductor.previousSong &&
+          this.Reproductor.previousSong !== e
+        ) {
+          const cancionPrevia = this.Reproductor.previousSong;
+
+          console.log("Canción previa desde playLink.onclick:", cancionPrevia);
 
 
-        });
-        
+          // Verificar en cuál lista estaba la canción reproducida anteriormente
+          if (
+            this.Reproductor.Canciones.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInCanciones-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+
+          if (
+            this.Reproductor.Playlist.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInPlaylist-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+
+          if (
+            this.Reproductor.Favoritos.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInFavoritos-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+        } 
 
         // Guardar el estado actual en localStorage
         const currentPlayingState = playImg.classList.contains("play");
@@ -772,17 +942,26 @@ class InterfazGrafica {
         }
       };
 
-      const isInPlaylist = this.Reproductor.Playlist.songs.some((song) =>
-        this.compareSongs(song, e)
-      );
+      // const isInPlaylist = this.Reproductor.Playlist.songs.some((song) =>
+      //   this.compareSongs(song, e)
+      // ); // Esta validacion no seria necesaria porque estamos en la seccion Playlist y basta con validar si la instancia (que es una COPIA del array original), o mejor dicho la cancion, ya esta incluida en el array de canciones de la playlist
+
+      const isInPlaylist = this.Reproductor.Playlist.songs.includes(e);
 
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
-          // Limpiar sessionStorage
-          arrayEjemp.forEach((s) => {
-            sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
-          });
+          // // Limpiar sessionStorage
+          // arrayEjemp.forEach((s) => {
+          //   sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          // });
+
+          // Detener reproducción de la cancion si esta reproduciendose actualmente
+          if (this.Reproductor.currentSong === e) {
+            this.Reproductor.pauseAudio();
+          }
+
+          // Remover la cancion de la playlist
           this.removerCancionPlaylist(i, config);
         };
       } else {
@@ -797,10 +976,11 @@ class InterfazGrafica {
 
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
-          // Limpiar sessionStorage
-          arrayEjemp.forEach((s) => {
-            sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
-          });
+          // // Limpiar sessionStorage
+          // arrayEjemp.forEach((s) => {
+          //   sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          // });
+
           this.removerCancionFavoritos(i, config);
         };
       } else {
@@ -959,13 +1139,50 @@ class InterfazGrafica {
       playLink.onclick = (i) => {
         i.preventDefault();
 
-        // Limpiar sessionStorage
-        arrayEjemp.forEach((s) => {
-          sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
-          sessionStorage.setItem(`isPlayingInCanciones-${s.id}`, false);
-          sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+        // Si habia una canción anterior reproduciendose inmediatmaente antes de reproducir esta, actualizar su estado en sessionStorage a false
+        if (
+          this.Reproductor.previousSong &&
+          this.Reproductor.previousSong !== e
+        ) {
+          const cancionPrevia = this.Reproductor.previousSong;
 
-        });
+          console.log("Canción previa desde playLink.onclick:", cancionPrevia);
+
+
+          // Verificar en cuál lista estaba la canción reproducida anteriormente
+          if (
+            this.Reproductor.Canciones.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInCanciones-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+
+          if (
+            this.Reproductor.Playlist.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInPlaylist-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+
+          if (
+            this.Reproductor.Favoritos.songs.some(
+              (song) => song === cancionPrevia
+            )
+          ) {
+            sessionStorage.setItem(
+              `isPlayingInFavoritos-${cancionPrevia.id}`,
+              "false"
+            );
+          }
+        } 
 
         // Guardar el estado actual en localStorage
         const currentPlayingState = playImg.classList.contains("play");
@@ -983,7 +1200,7 @@ class InterfazGrafica {
 
         // Alternar el icono de reproducción
         playImg.classList.toggle("iconPause");
-        playImg.classList.toggle("play"); //Reciente agregado
+        playImg.classList.toggle("play");
 
         if (
           this.Reproductor.currentSong === e &&
@@ -1018,10 +1235,11 @@ class InterfazGrafica {
       if (isInPlaylist) {
         playListImg.src = "src/trash_btn.svg";
         playListLink.onclick = (i) => {
-          // Limpiar sessionStorage
-          arrayEjemp.forEach((s) => {
-            sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
-          });
+          // // Limpiar sessionStorage
+          // arrayEjemp.forEach((s) => {
+          //   sessionStorage.setItem(`isPlayingInPlaylist-${s.id}`, false);
+          // });
+
           this.removerCancionPlaylist(i, config);
         };
       } else {
@@ -1030,16 +1248,24 @@ class InterfazGrafica {
         };
       }
 
-      const isFavorite = this.Reproductor.Favoritos.songs.some((song) =>
-        this.compareSongs(song, e)
-      );
+      // const isFavorite = this.Reproductor.Favoritos.songs.some((song) =>
+      //   this.compareSongs(song, e)
+      // );
+
+      const isFavorite = this.Reproductor.Favoritos.songs.includes(e);
 
       if (isFavorite) {
         favoriteLink.onclick = (i) => {
-          // Limpiar sessionStorage
-          arrayEjemp.forEach((s) => {
-            sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
-          });
+          // // Limpiar sessionStorage
+          // arrayEjemp.forEach((s) => {
+          //   sessionStorage.setItem(`isPlayingInFavoritos-${s.id}`, false);
+          // });
+
+          // Detener reproducción de la cancion si esta reproduciendose actualmente
+          if (this.Reproductor.currentSong === e) {
+            this.Reproductor.pauseAudio();
+          }
+
           this.removerCancionFavoritos(i, config);
         };
       } else {
@@ -1121,10 +1347,11 @@ class Reproductor {
     this.Playlist = new Playlist("Playlist", this.InterfazGrafica);
     this.Favoritos = new Favoritos("Favoritos", this.InterfazGrafica);
     this.InterfazGrafica.renderHtmlCanciones(); // Llamada al metodo de la clase InterfazGrafica que agrega todas las canciones al contenedor de la seccion Canciones
-    this.imput_search = document.getElementById("input_search");
     this.reproductorDeAudio = new Audio();
     this.reproductorDeAudio.volume = 0.2;
     this.currentSong = null; // Para rastrear la canción actual. Inicialización como null para indicar que ninguna canción se está reproduciendo al principio
+    this.InterfazGrafica.buscarCancion();
+    this.previousSong = null;
   }
 
   playAudio() {
@@ -1133,7 +1360,18 @@ class Reproductor {
     //   (i) => i.id === parseInt(getSongId)
     // ); // Todas estas validaciones que habia hecho para encontrar el id de la cancion y a su vez hallar la instancia de la cancion en su respectivo array, no era necesario porque al usar el forEach se tenia acceso a la instancia y aunque el eventlistener escucha el evento clic sobre el DOM (i) como es un callback de una funcion tambien podia pasar la instancia de la cancion (e) como argumento en el callback de la funcion.
 
+    // Guardar la canción anterior que hasta hace instantes se esta reproduciendo, si hay una canción actual
+    if (this.currentSong) {
+      this.previousSong = this.currentSong;
+    }
+
+    console.log("Cancion actual desde playAudio::", this.currentSong);
+    console.log("Cancion previa desde playAudio:", this.previousSong); // El método playAudio se llama dentro del método onclick del enlace (a) del boton (playLink). En el onclick de playLink es allí donde se produce la decisión de cambiar la canción.
+
+
+
     this.reproductorDeAudio.play();
+    this.InterfazGrafica.currentSongNowPlaying(); // Llamando a este metodo desde aqui SÍ me imprime la cancion actualmente reproduciendose y no la anterior que se estaba reproduciendo.
   }
 
   pauseAudio() {
@@ -1144,3 +1382,11 @@ class Reproductor {
 const reproductor = new Reproductor();
 
 // if (e.target.closest("#" + this.Reproductor.Canciones.id_playlist.id)) //Estamos concatenando "#" + this.Reproductor.Canciones.id_playlist.id, lo cual produce un selector CSS válido (#id_del_elemento). Esto le permite a closest() buscar el elemento adecuado en el DOM según su ID.
+
+// Estoy tratando con una aplicación que tiene tres secciones (Canciones, Playlist y Favoritos) que comparten las mismas instancias de la clase Song. Actualmente, cuando reproduzco una canción en una sección, esa misma canción se reproduce y puede ser pausada o reproducida desde cualquier otra sección en el mismo punto en que se dejó. Sin embargo, quiero que cada sección maneje la reproducción de las canciones de manera independiente, es decir, si reproduzco una canción en una sección y luego reproduzco la misma canción en otra sección, debería empezar desde el principio.
+
+// Por esto la solucion fue:
+
+// Separación de Instancias: En lugar de compartir las mismas instancias de canciones entre Canciones, Playlist y Favoritos, considera crear copias independientes de cada canción para cada sección. Esto asegura que cualquier acción de reproducción o pausa en una sección no afecte a las otras.
+
+// Gestión de Eventos: Asegúrate de que los eventos de reproducción (play, pause, etc.) estén vinculados a la instancia correcta de la canción en cada sección. Esto implica identificar correctamente qué instancia de canción se está reproduciendo y asegurarse de que el estado de reproducción se maneje de manera aislada para cada sección.
